@@ -71,6 +71,19 @@ Home
 </div>
 
 <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/worker.js')
+      .then(reg => {
+        console.log('Service worker registered', reg);
+      })
+      .catch(err => {
+        console.error('Service worker registration failed', err);
+      });
+  });
+}
+
 async function search_ai(prompt) {
   const response = await fetch(
     "https://localai.byte256.uk/v1/chat/completions",

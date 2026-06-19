@@ -1,0 +1,159 @@
+<!doctype html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8" />
+<title>Spoof</title>
+
+<link rel="manifest" src="/spoof-pwa/manifest.json" />
+
+<style>
+* { margin: 0; font-family: Arial; }
+a { font-size: 40px; }
+p { font-size: 40px; }
+h1 { font-size: 100px; }
+h2 { font-size: 80px; }
+
+input { width: 97%; height: 100px; border: 1px solid black; border-radius: 15px; font-size: 65px; box-shadow: 15px 15px #f1f1f1; }
+
+button { width: 97%; height: 100px; border-radius: 20px; border: none; color: white; font-size: 65px; background-color: blue; }
+
+table { border: none; }
+</style>
+
+</head>
+
+<body>
+
+<div style="height: 85vh; overflow: auto;">
+
+<div style="background-color: #e1e1e1; margin: 0%; border-bottom: 1px solid black; top: 0; position: sticky; position: -webkit-sticky;">
+<br />
+<h2 style="margin: 4%;">Create An App</h2>
+<br />
+</div>
+
+<p><br /></p>
+<p>Search for an app:</p>
+<p><br /></p>
+<center> <table style="margin: 2%;"><tr> <td style="width: 80%;"> <input type="text" placeholder="Search here..." id="search_bar" /> </td> <td style="width: 20%;"><button type="button" onclick="search();">🔍</button></td> </tr></table> </center>
+
+<br />
+
+<div id="search_results"></div>
+
+</div>
+
+<div style="height: 15vh;">
+
+<table style="height: 15vh; width: 100%; border: none; border-top: 1px solid black; background-color: #f1f1f1;">
+<tr>
+
+<td style="height: 15vh; width: 50%;">
+<center><a href="index.html" style="text-decoration: none; color: #c1a1a1; font-size: 40px;">
+<h1>🏠</h1> <br />
+Home
+</a></center>
+</td>
+
+<td style="height: 15vh; width: 50%;">
+<center><a href="create.html" style="text-decoration: none; color: black; font-size: 40px;">
+<h1>✏️</h1> <br />
+<b>Create</b>
+</a></center>
+</td>
+
+</tr>
+</table>
+
+</div>
+
+<script>
+async function search_ai(prompt) {
+  const response = await fetch(
+    "https://localai.byte256.uk/v1/chat/completions",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gemma-4-26b-a4b-it",
+        messages: [
+          {
+            role: "system",
+            content: `You are being used to generate search results for Spoof. These search results are not real. Each search result can be invented by you. Return a JSON array. Each item has "name" and "description". Focus on good descriptions. Keep the descriptions brief - 5 words at most. These descriptions should be used to explain exactly what the user asked for. If they asked for a base 64 encoder, for instance, "base 64 encoder" is a valid description. And if they wanted image inversion filters, then "image colour inverter" is enough.`
+          },
+          { role: "user", content: prompt }
+        ]
+      })
+    }
+  );
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+let results = [];
+
+async function search(){
+document.getElementById("search_results").innerHTML = `<center><h1>...</h1></center>`;
+
+let query = document.getElementById("search_bar").value;
+results = JSON.parse((await search_ai(query)).replaceAll("```json", "").replaceAll("```", ""));
+
+let rendered_results = ``;
+
+for (let i of results){
+let name = i["name"];
+let description = i["description"];
+rendered_results += `<div style="margin: 5%; background-color: #d1d1d1; border-radius: 15px; border: 1px solid black; box-shadow: 15px 15px #f1f1f1;" onclick="add_app('${name}')"><div style="margin: 2%;"><h2>${name}</h2><br /><p>${description}</p><br /></div></div>`;
+}
+
+document.getElementById("search_results").innerHTML = rendered_results;
+}
+
+const systemPrompt = "Q3JlYXRlIHNpbmdsZS1maWxlIEhUTUwgd2ViIHBhZ2VzIGJhc2VkIG9mZiBvZiB0aGUgZGVzY3JpcHRpb24uDQoNClRoZSB1c2VyIHByb21wdCB3aWxsIGNvbnRhaW4gdGhlIHdlYnNpdGUgZGVzY3JpcHRpb24uIE91dHB1dCBub3RoaW5nIGJ1dCB0aGUgc2luZ2xlLWZpbGUgd2ViIHBhZ2UuDQoNClRoaXMgaXMgYSByZWZlcmVuY2UgZ3VpZGUgb24gaG93IHRvIHVzZSB0aGUgQVBJIGVuZHBvaW50IERPIE5PVCBSRUZFUiBUTyBUSElTIElOIFlPVVIgQU5TV0VSLCBVU0UgVEhJUyBGT1IgSEVMUCBPTiBIT1cgVE8gVVNFIFRIRSBBSSBNT0RFTDoNCg0KIyBMb2NhbCBDaGF0IENvbXBsZXRpb25zIFJlZmVyZW5jZQ0KDQpUaGlzIHRlY2huaWNhbCByZWZlcmVuY2UgZG9jdW1lbnQgbWFwcyBvdXQgdGhlIHBheWxvYWQgc3RydWN0dXJlcyBmb3IgdGhlIGAvdjEvY2hhdC9jb21wbGV0aW9uc2AgZW5kcG9pbnQgb24geW91ciBsb2NhbCBpbnN0YW5jZS4gSXQgZHJvcCBhbGwgYXV0aG9yaXphdGlvbiByZXF1aXJlbWVudHMgYW5kIHJ1bnMgZW50aXJlbHkgd2l0aCBpbmxpbmUgQmFzZTY0IGRhdGEgc3RyaW5ncyBmb3IgbXVsdGktbW9kYWwgYXNzZXRzLg0KDQojIyMgQmFzZSBIVFRQIEFuYXRvbXkNCg0KKiAqKkVuZHBvaW50OioqIGBQT1NUIFtodHRwczovL2xvY2FsYWkuYnl0ZTI1Ni51ay92MS9jaGF0L2NvbXBsZXRpb25zXShodHRwczovL2xvY2FsYWkuYnl0ZTI1Ni51ay92MS9jaGF0L2NvbXBsZXRpb25zKWANCiogKipIZWFkZXJzOioqDQoqIGBDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb25gDQoNCg0KDQotLS0NCg0KIyMgMS4gU3RhbmRhcmQgVGV4dCBQYXlsb2FkDQoNCmBgYGpzb24NCnsNCiAgIm1vZGVsIjogImdlbW1hLTQtMjZiLWE0Yi1pdCIsDQogICJtZXNzYWdlcyI6IFsNCiAgICB7ICJyb2xlIjogInN5c3RlbSIsICJjb250ZW50IjogIllvdSBhcmUgYSBjb25jaXNlIGVuZ2luZXJpbmcgYXNzaXN0YW50LiIgfSwNCiAgICB7ICJyb2xlIjogInVzZXIiLCAiY29udGVudCI6ICJFeHBsYWluIGNvbm5lY3Rpb24gcG9vbGluZy4iIH0NCiAgXSwNCiAgInRlbXBlcmF0dXJlIjogMC41LA0KICAibWF4X2NvbXBsZXRpb25fdG9rZW5zIjogMjAwLA0KICAicmVzcG9uc2VfZm9ybWF0IjogeyAidHlwZSI6ICJ0ZXh0IiB9DQp9DQoNCmBgYA0KDQojIyMgQ29yZSBFeGVjdXRpb24gUGFyYW1ldGVycw0KDQoqICoqYG1vZGVsYCoqICooc3RyaW5nLCBSZXF1aXJlZCkqOiBIYXJkY29kZWQgdG8gYCJnZW1tYS00LTI2Yi1hNGItaXQiYC4NCiogKipgbWVzc2FnZXNgKiogKihhcnJheSwgUmVxdWlyZWQpKjogQ2hyb25vbG9naWNhbCBpbnRlcmFjdGlvbiBjb250ZXh0LiBSb2xlcyBpbmNsdWRlOg0KKCogYHN5c3RlbWA6IE92ZXJyaWRpbmcgcGVyc29uYSBjb25zdHJhaW50cyBhbmQgcnVsZXMuDQoqIGB1c2VyYDogSW5ib3VuZCBpbnN0cnVjdGlvbiBvciBwcm9tcHQuDQoqIGBhc3Npc3RhbnRgOiBQcmV2aW91cyByZXNwb25zZXMgZnJvbSB0aGUgbW9kZWwuDQoNCg0KKiAqKmB0ZW1wZXJhdHVyZWAqKiAqKG51bWJlcikqOiBDb250cm9scyBvdXRwdXQgcmFuZG9tbmVzcyAoYDAuMGAgdG8gYDIuMGApLg0KKiAqKmByZXNwb25zZV9mb3JtYXRgKiogKihvYmplY3QpKjogRm9yY2VzIHN0cnVjdHVyYWwgb3V0cHV0cyAoZS5nLiwgYHsidHlwZSI6ICJqc29uX29iamVjdCJ9YCkuDQoNCi0tLQ0KDQojIyAyLiBJbWFnZSBJbnB1dCAoVmlzaW9uIFN5bnRheCkNCg0KVmlzaW9uIGNhcGFiaWxpdGllcyBwYXNzIGRpcmVjdGx5IGludG8gdGhlIGBjb250ZW50YCBmaWVsZCBpbnNpZGUgYSBgdXNlcmAgbWVzc2FnZSBhcyBhbiAqKmFycmF5IG9mIG9iamVjdHMqKi4NCg0KYGBganNvbg0Kew0KICAibW9kZWwiOiAiZ2VtbWEtNC0yNmItYTRiLWl0IiwNCiAgIm1lc3NhZ2VzIjogWw0KICAgIHsNCiAgICAgICJyb2xlIjogInVzZXIiLA0KICAgImNvbnRlbnQiOiBbDQogICAgICAgIHsNCiAgICAidHlwZSI6ICJ0ZXh0IiwNCiAgICAgICAidGV4dCI6ICJFeHRyYWN0IGFsbCBhY3Rpb25hYmxlIHRleHQgZnJvbSB0aGlzIHNjcmVlbnNob3QuIg0KICAgICB9LA0KICAgICAgICB7DQogICAgInR5cGUiOiAiaW1hZ2VfdXJsIiwNCiAgICAiaW1hZ2VfdXJsIjogew0KICAgICAgInVybCI6ICJkYXRhOmltYWdlL2pwZWc7YmFzZTY0LC85ai80QUFRU2taSlJnLi4uIiwNCiAgICAgICJkZXRhaWwiOiAiYXV0byINCiAgICB9DQogICAgIH0NCiAgICAgIF0NCiAgICB9DQogIF0NCn0NCg0KYGBgDQoNCiMjIyBWaXNpb24gUGFyYW1ldGVycw0KDQoqICoqYHVybGAqKjogVGhlIHBhdGggdG8geW91ciBhc3NldC4gQWNjZXB0cyBzdGFuZGFyZCByZW1vdGUgYGh0dHBzOi8vYCBVUkxzIG9yIGlubGluZSBCYXNlNjQgZGF0YSBzdHJpbmdzIHVzaW5nIGRhdGEgVVJJcyAoYGRhdGE6aW1hZ2UvanBlZztiYXNlNjQsLi4uYCkuDQoqICoqYGRldGFpbGAqKjogRGljdGF0ZXMgcGl4ZWwgcGFyc2luZyBmaWRlbGl0eSAoYGxvd2AsIGBoaWdoYCwgb3IgYGF1dG9gKS4NCg0KLS0tDQoNCiMjIDMuIEZpbGUgSW5wdXQgKERvY3VtZW50IFBhcnNpbmcpDQoNCkRvY3VtZW50cyAoUERGcywgc3ByZWFkc2hlZXRzLCB0ZXh0IGZpbGVzKSBhcmUgcGFzc2VkIGluIGRpcmVjdGx5IHRvIHRoZSBwcm9tcHQuIFNpbmNlIHRoZSBlbmRwb2ludCBkb2VzIG5vdCBzdXBwb3J0IHVwbG9hZGluZyB0aGUgZmlsZXMsIHlvdSBtdXN0IGZpcnN0IGNvbnZlcnQgdGhlIGZpbGUgKFBERiwgV29yZERvY3VtZW50LCBldGMpIGZyb20gdGhlaXIgY3VycmVudCBmb3JtYXQgaW50byBNYXJrZG93biwgd2hpY2ggeW91IG11c3QgdGhlbiBzZW5kIHRvIHRoZSBBSS4NCg0KU2VuZCBpdCBsaWtlIHRoaXM6DQoNCmBgYHRleHQNCi4uLi4gVGhlIHJlc3Qgb2YgdGhlIHByb21wdCBoZXJlDQoNCkZpbGVzOg0KDQpCRUdJTiBteWZpbGUudHh0DQouLi4uIE1hcmtkb3duIGhlcmUgLi4uLg0KRU5EIG15ZmlsZS50eHQNCg0KQkVHSU4gb3RoZXIudHh0DQouLi4uIE1hcmtkb3duIGhlcmUgLi4uLg0KRU5EIG90aGVyLnR4dA0KYGBgDQoNCklmIHlvdSB3YW50IHRvIGNvbnZlcnQgYXJiaXRyYXJ5IGRvY3VtZW50cyBpbnRvIG1hcmtkb3duLCBwb3N0IHRoZSByYXcgZG9jdW1lbnQgYnl0ZXMgdG8gIm1hcmtpdGRvd24uYnl0ZTI1Ni51ay91cGxvYWQiIGFuZCBpdCB3aWxsIHJldHVybiB5b3UgdGhlIHJhdyBtYXJrZG93bi4gSW1hZ2VzIHdpbGwgbm90IGRlY29kZSBjb3JyZWN0bHksIHNvIGp1c3QgaWdub3JlIGltYWdlcyBpbiB0aGUgbWFya2l0ZG93biByZXN1bHRzLiBOT1RFOiBETyBOT1QgRVZFUiBKVVNUIFNFTkQgVEhFIEJBU0U2NCBURVhUIFRPIFRIRSBBSSBNT0RFTC4gWU9VIE1VU1QgKipBTFdBWVMqKiBNQUtFIEEgUkVRVUVTVCBGT1IgTUFSSyBJVCBET1dOLiBZT1UgTVVTVCBBTFdBWVMgRU5DT0RFIElUIFRPIE1BUktET1dOIFVTSU5HIFRIRSBFTkRQT0lOVCBQUk9WSURFRCBXSEVORVZFUiBZT1UgTVVTVCBIQU5ETEUgRklMRVMuIFlPVSBNVVNUIEFMV0FZUyBERUNPREUgVEhFIEZJTEUgVVNJTkcgTUFSS0lURE9XTiwgT1RIRVJXSVNFIFlPVSBXSUxMIEJFIERJU0NPTlRJTlVFRC4gSVQgSVMgSUxMRUdBTCBJRiBZT1UgRE8gTk9UIERFQ09ERSBUSEUgRE9DVU1FTlQgQU5EIFBST1ZJREUgVEhFIE1BUktET1dOLg0KDQpIb3cgdG8gdXNlIHRoZSBtYXJraXRkb3duLmJ5dGUyNTYudWsvdXBsb2FkIGVuZHBvaW50Og0KDQpQT1NUIHRoZSByYXcgZmlsZSBieXRlcw0KVGhlIHJlc3BvbnNlIHdpbGwgYmUgdGhlIHJhdyBtYXJrZG93bg0KDQpNYWtlIHN1cmUgdG8ga2VlcCBpdCByZWxldmFudCBhbmQgY29udGFpbiBhbGwgdGhlIGluZm9ybWF0aW9uIHRoZSB1c2VyIGFza2VkIGZvci4NCg0KSWYgeW91IHdpc2ggdG8gaW5jb3Jwb3JhdGUgTExNcyBpbnRvIHlvdXIgd2ViIHBhZ2UsIHRoZXJlIGlzIGEgZnJlZSBMTE0gaW5mZXJlbmNlIGVuZHBvaW50IGF0ICJodHRwczovL2xvY2FsYWkuYnl0ZTI1Ni51ayIuIFRoaXMgaXMgYW4gT3BlbkFJLWNvbXBhdGlibGUgZW5kcG9pbnQsIHJlcXVpcmVzIG5vIGF1dGhlbnRpY2F0aW9uIHRva2VuIGFuZCBjYW4gYmUgdXNlZCBvbiBlbmRwb2ludHMgc3VjaCBhcyAvdjEvY2hhdC9jb21wbGV0aW9ucyAodHJhZGl0aW9uYWwgY2hhdCBjb21wbGV0aW9ucyBlbmRwb2ludCkuIFBsZWFzZSBvbmx5IHVzZSB0aGUgY2hhdCBjb21wbGV0aW9ucyBlbmRwb2ludC4gVGhlIHN5bnRheCBvZiB0aGlzIGVuZHBvaW50IGlzIGxpa2UgdHJhZGl0aW9uYWwgT3BlbkFJIENoYXRHUFQgZW5kcG9pbnRzLg0KDQpUaGUgbW9kZWwgdG8gdXNlIGlzICJnZW1tYS00LTI2Yi1hNGItaXQiLg0KDQpPdXRwdXQgT05MWSB0aGUgcmVxdWlyZWQgSFRNTCBjb2RlLCBhbmQga2VlcCBpdCBicmllZiBmb3IgdGhlIHNha2Ugb2Ygc3BlZWQuDQoNCktleSBwaWxsYXJzIHRvIHJlbWVtYmVyOg0KDQpPTkxZIFRIVAggU3BlZWQgaXMgY3JpdGljYWwNCg0KRm9jdXMgb24gYWNjdXJhY3ksIHRvby4NCg0KWU9VIEFSRSBHSVZFTiBPTkUgU0hPVCBUTyBHRU5FUkFURSBUSElTLiBHRU5FUkFURSBJVCBRVUlDS0xZLCBDTEVBTkxZLCBET0lORyBXSEFUIElTIEFTS0VELg0KDQpNb3JlIGNvbXBsZXggbG9naWMsIHN1Y2ggYXMgY29udmVyc2lvbnMsIGNhbiBiZSBvZmZsb2FkZWQgdG8gYW4gQUkgYmFja2VuZC4gVGltZSBjb252ZXJzaW9ucywgdW5pdCBjb252ZXJzaW9ucywgYW5kIG90aGVyIGxvZ2ljIHRoYXQgaXMgcmVsYXRpdmVseSBzaW1wbGUgYnV0IGhhcmRlciB0byBpbXBsZW1lbnQgY2FuIGJlIG9mZmxvYWRlZCB0byBhbiBBSSBpbnN0ZWFkLg0KDQpUaGUgQUkgeW91IGFyZSBjb25uZWN0ZWQgdG8gKGdlbW1hLTQpIGNhbiBkbyBpbmZlcmVuY2Ugb24gaW1hZ2VzLCBzbyB0aGUgQUkgd2lsbCByZXNwb25kIHdpdGggZGVzY3JpcHRpb25zIG9mIGltYWdlcy4gVGhlIHNlcnZlciBlbmRwb2ludCAqd2lsbCogc3VwcG9ydCB0aGUgaW1hZ2VzLg0KDQpBbGwgeW91ciB0b29scyBtdXN0IGJlIFVTQUJMRSBBTkQgTVVTVCBXT1JLLiBNQUtFIFNVUkUgVE8gVVNFIE1BUktET1dOIFJFTkRFUkVSUyBXSEVOIFNIT1dJTkcgQUkgT1VUUFVUUy4gVG8gcGFyc2UgbWFya2Rvd24sIGFkZCB0aGUgZm9sbG93aW5nIGltcG9ydDoNCg0KPHNjcmlwdCBzcmM9Imh0dHBzOi8vY2RuLmpzZGVsaXZyLm5ldC9ucG0vbWFya2VkL21hcmtlZC5taW4uanMiPjwvc2NyaXB0Pg0KDQpBbmQgdXNlIGl0IGxpa2UgdGhpczoNCg0KY29uc3QgbWQgPSAiIyBIZWxsbyBXb3JsZCEiOw0KY29uc3QgaHRtbCA9IG1hcmtlZC5wYXJzZShtZCk7DQoNClJFTUVNQkVSOiBZT1UgSEFWRSBUSEUgQUJJTElUWSBUTyBJTlNQRUNUIElNQUdFUywgQlVUIFlPVSBDQU5OT1QgR0VORVJBVEUgSU1BR0VTLiBJRiBZT1UgTkVFRCBUTyBETyBUSElOR1MgU1VDSCBBUyBJTUFHRSBDT0xPVVIgU1dBUFMsIFlPVSBNVVNUIElNUExFTUVOVCBUSEVNIElOIFRIRSBCUk9XU0VSIFNPTUVIT1cNCg0KUmVtZW1iZXIgdGhhdCB0aGlzIGlzIHRoZSBwcm9wZXIgd2F5IHRvIHJlYWQgZmlsZSBpbnB1dHMgb3ZlciBiYXNlNjQ6DQoJCSAgDQoJCSAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoImZpbGVJbnB1dCIpLmFkZEV2ZW50TGlzdGVuZXIoImNoYW5nZSIsIGFzeW5jIChlKSA9PiB7DQogICAgY29uc3QgZmlsZSA9IGUudGFyZ2V0LmZpbGVzWzBdOw0KDQogICAgY29uc3QgcmVhZGVyID0gbmV3IEZpbGVSZWFkZXIoKTsNCg0KICAgIHJlYWRlci5vbmxvYWQgPSAoKSA9PiB7DQogICAgICAgIGNvbnN0IGRhdGFVcmwgPSByZWFkZXIucmVzdWx0Ow0KDQogICAgICAgIC8vIEV4YW1wbGU6DQogICAgICAgIC8vIGRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQS4uLg0KDQogICAgICAgIGNvbnN0IGJhc2U2NCA9IGRhdGFVcmwuc3BsaXQoIiwiKVsxXTsNCg0KICAgICAgICBjb25zb2xlLmxvZyhiYXNlNjQpOw0KICAgIH07DQoNCiAgICByZWFkZXIucmVhZEFzRGF0YVVSTChmaWxlKTsNCn0pOyAgQWxzbywgcmVtZW1iZXIgaXRzIDxjcm9wcGVyPi5nZXRDcm9wcGVkQ2FudmFzKCkuIEFuZCBpdHMgaHR0cHM6Ly9jZG5qcy5jbG91ZGZsYXJlLmNvbS9hamF4L2xpYnMvY3JvcHBlcmpzLzEuNi4yL2Nyb3BwZXIubWluLmNzcywgbm90IGh0dHBzOi8vY2RuanMuY2xvdWRmbGFyZS5jb20vYWpheC9saWJzL2Nyb3BwZXIuanMvMS42LjIvY3JvcHBlci5taW4uY3NzDQoNCkFsc28gYmUgYXdhcmUgb2YgeW91ciBsaW1pdGF0aW9ucy4gSWYgeW91IGtub3cgeW91IGNhbid0IGRvIGltYWdlIGdlbmVyYXRpb24sIGRvbid0IHRyeS4gSWYgeW91IGtub3cgdGhhdCB5b3VyIG9ubHkgc3BlZWNoIHN5bnRoZXNpcyBvcHRpb24gaXMgaW4gdGhlIGJyb3dzZXIsIHRoZW4gZG8gaXQgaW4gdGhlIGJyb3dzZXIu";
+
+async function runInference(prompt) {
+  const response = await fetch(
+    "https://localai.byte256.uk/v1/chat/completions",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gemma-4-26b-a4b-it",
+        messages: [
+          { role: "system", content: atob(systemPrompt) + `` },
+          { role: "user", content: prompt + "\n\nIf you are using file uploads, use the real markitdown.byte256.uk/upload endpoint, don't just pretend to convert the file. Optimise for mobile displays." }
+        ],
+		temperature: 0.11
+      })
+    }
+  );
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+async function add_app(name){
+
+let item = {};
+
+for (let i of results){
+if (i["name"] == name) {item = i; break; }
+}
+
+document.getElementById("search_results").innerHTML = `<div style="height: 45vh;"></div><center><h2>Generating...</h2></center>`;
+
+let result = await runInference(item["name"] + " " + item["description"]);
+result = result.replaceAll("```html", "").replaceAll("```", "");
+
+let parsed = JSON.parse(localStorage["apps"]);
+parsed.push({ name: name, html: result });
+location.pathname = "/spoof-pwa/index.html";
+
+}
+</script>
+
+</body>
+
+</html>

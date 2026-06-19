@@ -1,0 +1,9 @@
+{
+  "name": "Spoof",
+  "short_name": "Spoof",
+  "start_url": "/spoof-pwa/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": []
+}

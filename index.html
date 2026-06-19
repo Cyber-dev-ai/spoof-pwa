@@ -1,0 +1,101 @@
+<!doctype html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8" />
+<title>Spoof</title>
+
+<link rel="manifest" src="/spoof-pwa/manifest.json" />
+
+<style>
+* { margin: 0; font-family: Arial; }
+a { font-size: 30px; }
+p { font-size: 30px; }
+h1 { font-size: 100px; }
+h2 { font-size: 80px; }
+</style>
+
+</head>
+
+<body>
+
+<div style="height: 85vh; overflow: auto;">
+
+<div id="apps"></div>
+<div id="viewer" style="display: none;">
+<div style="height: 5vh; border-bottom: 1px solid black;">
+<h2 onclick="closeViewer();" style="margin: 5%; margin-left: 87%;">X</h2>
+</div>
+<iframe style="width: 100%; height: 80vh; border: none;" id="presenter"></iframe>
+</div>
+
+</div>
+
+<div style="height: 15vh;">
+
+<table style="height: 15vh; width: 100%; border: none; border-top: 1px solid black; background-color: #f1f1f1;">
+<tr>
+
+<td style="height: 15vh; width: 50%;">
+<center><a href="index.html" style="text-decoration: none; color: black; font-size: 40px;">
+<h1>🏠</h1> <br />
+<b>Home</b>
+</a></center>
+</td>
+
+<td style="height: 15vh; width: 50%;">
+<center><a href="create.html" style="text-decoration: none; color: #c1a1a1; font-size: 40px;">
+<h1>✏️</h1> <br />
+Create
+</a></center>
+</td>
+
+</tr>
+</table>
+
+</div>
+
+<script>
+if (!("apps" in localStorage)) localStorage["apps"] = '[]';
+
+let apps = JSON.parse(localStorage["apps"]);
+let app_list = document.getElementById("apps");
+for (let i of apps){
+app_list.innerHTML += `<h2 style="margin: 4%; margin-left: 10%; margin-right: 10%;" onclick="load('${i["name"]}')">${i["name"]}</h2><h2 style="color: red; margin-left: 87%; font-size: 30px;" onclick="deleteApp('${i["name"]}');">Delete</h2><hr style="margin: 3%;" />`;
+}
+
+function load(name){
+let item = {};
+let apps = JSON.parse(localStorage["apps"]);
+for (let app of apps){
+if (app["name"] == name) { item = app; break; }
+}
+
+// Load it up
+document.getElementById("apps").style.display = "none";
+document.getElementById("viewer").style.display = "block";
+document.getElementById("presenter").contentDocument.body.innerHTML = item["html"];
+}
+
+function closeViewer(){
+document.getElementById("apps").style.display = "block";
+document.getElementById("viewer").style.display = "none";
+}
+
+function deleteApp(name){
+let result = [];
+
+for (let i of JSON.parse(localStorage["apps"])){
+if (i["name"] != name) result.push(i);
+}
+
+localStorage["apps"] = JSON.stringify(result);
+location.reload();
+}
+</script>
+
+</body>
+
+</html>

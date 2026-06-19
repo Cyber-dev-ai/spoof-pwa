@@ -74,7 +74,7 @@ Home
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/worker.js')
+      .register('/spoof-pwa/worker.js')
       .then(reg => {
         console.log('Service worker registered', reg);
       })

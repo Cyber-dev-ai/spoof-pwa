@@ -162,6 +162,7 @@ result = result.replaceAll("```html", "").replaceAll("```", "");
 
 let parsed = JSON.parse(localStorage["apps"]);
 parsed.push({ name: name, html: result });
+localStorage["apps"] = JSON.stringify(parsed);
 location.pathname = "/spoof-pwa/index.html";
 
 }

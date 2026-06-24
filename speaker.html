@@ -15,7 +15,7 @@ recognition.onresult = (event) => {
 
         if (result.isFinal) {
             const text = result[0].transcript.trim();
-            //console.log(""Final:"", text);
+            console.log("Final:", text);
 
 window.chrome.webview.postMessage({ type: "STT_RESULT", text: text});
         }

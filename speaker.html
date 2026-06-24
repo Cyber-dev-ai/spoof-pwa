@@ -1,0 +1,28 @@
+<script>
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+const recognition = new SpeechRecognition();
+
+recognition.continuous = true;
+recognition.interimResults = false;
+recognition.lang = "en-GB";
+
+recognition.onresult = (event) => {
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+        const result = event.results[i];
+
+        if (result.isFinal) {
+            const text = result[0].transcript.trim();
+            console.log("Final:", text);
+        }
+    }
+};
+
+recognition.onerror = (e) => {
+    console.error(e);
+};
+
+recognition.start();
+</script>

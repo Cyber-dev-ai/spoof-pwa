@@ -7,7 +7,7 @@ const recognition = new SpeechRecognition();
 
 recognition.continuous = true;
 recognition.interimResults = false;
-recognition.lang = "en-GB";
+recognition.lang = ""en-GB"";
 
 recognition.onresult = (event) => {
     for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -15,10 +15,14 @@ recognition.onresult = (event) => {
 
         if (result.isFinal) {
             const text = result[0].transcript.trim();
-            console.log("Final:", text);
+            //console.log(""Final:"", text);
+
+window.chrome.webview.postMessage({ type: ""STT_RESULT"", text: text});
         }
     }
 };
+
+recognition.onend = () => { recognition.start(); }
 
 recognition.onerror = (e) => {
     console.error(e);
